@@ -55,7 +55,8 @@ class VisionModelBenchmark:
                     overall_start_time = time.time()
                     processes = []
                     for i in range(num_processes):
-                        p = mp.Process(target=self.run_benchmark, args=(model_func, input_size, batch_size, i, inference_times, barrier))
+                        p = mp.Process(
+                            target=self.run_benchmark, args=(model_func, input_size, batch_size, i, inference_times, barrier))
                         p.start()
                         processes.append(p)
                     for p in processes:
@@ -73,12 +74,13 @@ class VisionModelBenchmark:
             self.results[model_type] = model_results  # Assign to the main results dictionary under model type
         print(Fore.YELLOW + f"{self.results}")
         return self.results
-    
+
     def save_results_to_csv(self, filename):
         with open(filename, 'w', newline='') as file:
             writer = csv.writer(file)
             # Assuming 'Sequence Length' should be 'Batch Size', updating the header accordingly
-            writer.writerow(['Model Type', 'Batch Size', 'Number of Processes', 'Overall Time (s)', 'Average Inference Time (s)'])
+            writer.writerow(
+                ['Model Type', 'Batch Size', 'Number of Processes', 'Overall Time (s)', 'Average Inference Time (s)'])
             for model_type, model_info in self.results.items():
                 for batch_key, process_info in model_info.items():
                     batch_size = batch_key.split('_')[1]  # 'batchsize_1' -> '1'
@@ -102,12 +104,12 @@ class VisionModelBenchmark:
         warmup_tensor = torch.randn(1, 3, input_size, input_size).cuda()
         with torch.no_grad():
             for _ in range(10):
-                output = model(warmup_tensor)
+                _ = model(warmup_tensor)
 
         start_time = time.time()
         with torch.no_grad():
             for _ in range(1000):
-                output = model(input_tensor)
+                _ = model(input_tensor)
         total_time = time.time() - start_time
         inference_times[process_index] = total_time / 1000.0
         barrier.wait()
