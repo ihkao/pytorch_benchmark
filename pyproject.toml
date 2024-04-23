@@ -1,4 +1,41 @@
-[tool.pytest.ini_options]
-filterwarnings = [
-    "ignore::DeprecationWarning"
-]
+# Copyright 2024 Fujitsu Research of America, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+[tool.poetry]
+name = "pytorch-benchmark"
+version = "0.1.0"
+description = "This is a pytorch benchmark for testing multi-process."
+authors = ["I-Hsi Kao <ikao@fujitsu.com>"]
+license = "Apache-2.0"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+[tool.poetry.dev-dependencies]
+colorama = "*"
+flake8 = "*"
+pytest = "*"
+torch = { version = "*", source = "pytorch" }
+torchvision = { version = "*", source = "pytorch" }
+torchaudio = { version = "*", source = "pytorch" }
+transformers = "*"
+
+[[tool.poetry.source]]
+name = "pytorch"
+url = "https://download.pytorch.org/whl/cpu"
+priority = 'supplemental'
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

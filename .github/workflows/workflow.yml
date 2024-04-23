@@ -24,42 +24,43 @@ permissions:
   contents: read
 
 jobs:
-  lint:
+  setup-and-lint:
     runs-on: ubuntu-latest
     container:
       image: ubuntu:22.04
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python 3.8
+      - name: Set up Python
         uses: actions/setup-python@v3
         with:
           python-version: "3.8"
-      - name: Install Flake8
+      - name: Install dependencies for linting
         run: |
           python3 -m pip install flake8
       - name: Lint with flake8
         run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
 
-  test-LanguageBenchmarks:
+  test:
+    needs: setup-and-lint
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        test-suite: [test_languagebenchmarks, test_visionbenchmarks]
     container:
-      image: pytorch/pytorch:1.12.0-cpu
+      image: ubuntu:22.04
     steps:
       - uses: actions/checkout@v3
-      - name: Install additional dependencies
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.8"
+      - name: Install Poetry
         run: |
-          python -m pip install colorama pytest transformers
-      - name: Run tests
-        run: pytest test/test_languagebenchmarks.py
-  
-  test-VisionBenchmarks:
-    runs-on: ubuntu-latest
-    container:
-      image: pytorch/pytorch:1.12.0-cpu
-    steps:
-      - uses: actions/checkout@v3
-      - name: Install additional dependencies
+          curl -sSL https://install.python-poetry.org | python -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Install Dependencies Using Poetry
         run: |
-          python -m pip install colorama pytest transformers
-      - name: Run tests
-        run: pytest test/test_visionbenchmarks.py
+          poetry config virtualenvs.create false
+          poetry install
+      - name: Run ${{ matrix.test-suite }} tests
+        run: poetry run pytest test/${{ matrix.test-suite }}.py

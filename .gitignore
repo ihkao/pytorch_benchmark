@@ -4,3 +4,4 @@ __pycache__
 .pytest_cache
 *.csv
 .devcontainer
+poetry.lock
