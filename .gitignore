@@ -1,6 +1,6 @@
 .devcontainer
-.github
 .venv
 __pycache__
 .pytest_cache
 *.csv
+.devcontainer
