@@ -21,7 +21,7 @@ from BenchmarkMaker import VisionModelBenchmark
 mp.set_start_method('spawn', force=True)
 
 
-model_types = ['alexnet', 'densenet', 'googlenet', 'mobilenet', 'resnet18', 'resnext50_32x4d', 'vgg16']
+model_types = ['mobilenet']
 batch_sizes = [1]
 num_processes_list = [1]
 

@@ -30,18 +30,17 @@ jobs:
       image: ubuntu:22.04
     steps:
       - uses: actions/checkout@v3
-      - name: Install Python 3.8
-        run: |
-          apt-get update
-          apt-get install -y python3.8 python3-pip
-          update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 1
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.8"
       - name: Install Flake8
         run: |
           python3 -m pip install flake8
       - name: Lint with flake8
         run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
 
-  pytest:
+  test-LanguageBenchmarks:
     runs-on: ubuntu-latest
     container:
       image: pytorch/pytorch:latest
@@ -52,3 +51,15 @@ jobs:
           python -m pip install colorama pytest transformers
       - name: Run tests
         run: pytest test/test_languagebenchmarks.py
+  
+  test-VisionBenchmarks:
+    runs-on: ubuntu-latest
+    container:
+      image: pytorch/pytorch:latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install additional dependencies
+        run: |
+          python -m pip install colorama pytest transformers
+      - name: Run tests
+        run: pytest test/test_visionbenchmarks.py

@@ -109,10 +109,10 @@ class VisionModelBenchmark:
 
         start_time = time.time()
         with torch.no_grad():
-            for _ in range(1000):
+            for _ in range(100):
                 _ = model(input_tensor)
         total_time = time.time() - start_time
-        inference_times[process_index] = total_time / 1000.0
+        inference_times[process_index] = total_time / 100.0
         barrier.wait()
         del model
 
@@ -214,12 +214,12 @@ class LanguageModelBenchmark:
         # Actual measurement
         start_time = time.time()
         with torch.no_grad():
-            for _ in range(1000):
+            for _ in range(100):
                 if 't5' in model_name.lower():
                     model(input_ids=input_ids, decoder_input_ids=decoder_input_ids)
                 else:
                     model(input_ids)
         total_time = time.time() - start_time
-        inference_times[process_index] = total_time / 1000.0
+        inference_times[process_index] = total_time / 100.0
         barrier.wait()
         del model
