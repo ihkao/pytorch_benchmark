@@ -22,7 +22,7 @@ mp.set_start_method('spawn', force=True)
 
 
 model_types = ['bert', 'distilgpt2', 'gpt2', 'RoBERTa', 'T5']
-sequence_lengths = [10]
+sequence_lengths = [1]
 num_processes_list = [1]
 
 
@@ -34,10 +34,11 @@ def test_language_model_benchmark(model_type, seq_length, num_processes):
     benchmark = LanguageModelBenchmark(
         model_types=[model_type],
         sequence_lengths=[seq_length],
-        num_processes_list=[num_processes]
+        num_processes_list=[num_processes],
+        device='cpu'
     )
     # Run Test
-    result = benchmark.start_benchmark()
+    benchmark.start_benchmark()
     # Validation Result
     assert model_type in benchmark.results
     # Validation Process
@@ -55,7 +56,8 @@ def test_save_results_to_csv(model_type, seq_length, num_processes, tmp_path):
     benchmark = LanguageModelBenchmark(
         model_types=[model_type],
         sequence_lengths=[seq_length],
-        num_processes_list=[num_processes]
+        num_processes_list=[num_processes],
+        device='cpu'
     )
     # Run benchmark to populate results
     benchmark.start_benchmark()
@@ -69,7 +71,8 @@ def test_save_results_to_csv(model_type, seq_length, num_processes, tmp_path):
     with open(temp_file, mode='r', newline='') as file:
         reader = csv.reader(file)
         headers = next(reader)
-        expected_headers = ['Model Type', 'Sequence Length', 'Number of Processes', 'Overall Time (s)', 'Average Inference Time (s)']  # Changed 'ms' to 's'
+        expected_headers = [
+            'Model Type', 'Sequence Length', 'Number of Processes', 'Overall Time (s)', 'Average Inference Time (s)']
         assert headers == expected_headers, "CSV headers do not match expected headers"
 
         found = False

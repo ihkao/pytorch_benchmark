@@ -34,10 +34,11 @@ def test_model_benchmark(model_type, batch_size, num_processes):
     benchmark = VisionModelBenchmark(
         model_types=[model_type],
         batch_sizes=[batch_size],
-        num_processes_list=[num_processes]
+        num_processes_list=[num_processes],
+        device='cpu'
     )
     # Run Test
-    result = benchmark.start_benchmark()
+    benchmark.start_benchmark()
     # Validation Result
     assert model_type in benchmark.results
     # Validation Process
@@ -56,7 +57,8 @@ def test_save_results_to_csv(model_type, batch_size, num_processes, tmp_path):
     benchmark = VisionModelBenchmark(
         model_types=[model_type],
         batch_sizes=[batch_size],
-        num_processes_list=[num_processes]
+        num_processes_list=[num_processes],
+        device='cpu'
     )
     # Run benchmark to populate results
     benchmark.start_benchmark()
@@ -70,7 +72,8 @@ def test_save_results_to_csv(model_type, batch_size, num_processes, tmp_path):
     with open(temp_file, mode='r', newline='') as file:
         reader = csv.reader(file)
         headers = next(reader)
-        expected_headers = ['Model Type', 'Batch Size', 'Number of Processes', 'Overall Time (s)', 'Average Inference Time (s)']
+        expected_headers = [
+            'Model Type', 'Batch Size', 'Number of Processes', 'Overall Time (s)', 'Average Inference Time (s)']
         assert headers == expected_headers, "CSV headers do not match expected headers"
 
         found = False

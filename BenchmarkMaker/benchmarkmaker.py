@@ -26,10 +26,11 @@ init(autoreset=True)
 
 
 class VisionModelBenchmark:
-    def __init__(self, model_types=['alexnet'], batch_sizes=[1], num_processes_list=[1]):
+    def __init__(self, model_types=['alexnet'], batch_sizes=[1], num_processes_list=[1], device='cuda'):
         self.num_processes_list = num_processes_list
         self.model_types = model_types
         self.batch_sizes = batch_sizes
+        self.device = device
         self.model_dict = {
             'alexnet': (models.alexnet, 224),
             'densenet': (models.densenet161, 224),
@@ -96,12 +97,12 @@ class VisionModelBenchmark:
 
     def run_benchmark(self, model_func, input_size, batch_size, process_index, inference_times, barrier):
         torch.cuda.empty_cache()
-        model = model_func(weights=None).cuda()
-        input_tensor = torch.randn(batch_size, 3, input_size, input_size).cuda()
+        model = model_func(weights=None).to(self.device)
+        input_tensor = torch.randn(batch_size, 3, input_size, input_size).to(self.device)
         model.eval()
 
         # Warm-up phase (outside of timing)
-        warmup_tensor = torch.randn(1, 3, input_size, input_size).cuda()
+        warmup_tensor = torch.randn(1, 3, input_size, input_size).to(self.device)
         with torch.no_grad():
             for _ in range(10):
                 _ = model(warmup_tensor)
@@ -117,10 +118,11 @@ class VisionModelBenchmark:
 
 
 class LanguageModelBenchmark:
-    def __init__(self, model_types=['gpt2'], sequence_lengths=[10, 50], num_processes_list=[1]):
+    def __init__(self, model_types=['gpt2'], sequence_lengths=[10, 50], num_processes_list=[1], device='cuda'):
         self.model_types = model_types
         self.sequence_lengths = sequence_lengths
         self.num_processes_list = num_processes_list
+        self.device = device
         self.model_dict = {
             'bert': 'google-bert/bert-base-uncased',
             'distilgpt2': 'distilbert/distilgpt2',
@@ -145,7 +147,8 @@ class LanguageModelBenchmark:
                     overall_start_time = time.time()
                     processes = []
                     for i in range(num_processes):
-                        p = mp.Process(target=self.run_benchmark, args=(model_name, seq_length, tokenizer, i, inference_times, barrier))
+                        p = mp.Process(
+                            target=self.run_benchmark, args=(model_name, seq_length, tokenizer, i, inference_times, barrier))
                         p.start()
                         processes.append(p)
                     for p in processes:
@@ -163,11 +166,12 @@ class LanguageModelBenchmark:
             self.results[model_type] = model_results
         print(Fore.YELLOW + f"{self.results}")
         return self.results
-    
+
     def save_results_to_csv(self, filename):
         with open(filename, 'w', newline='') as file:
             writer = csv.writer(file)
-            writer.writerow(['Model Type', 'Sequence Length', 'Number of Processes', 'Overall Time (s)', 'Average Inference Time (s)'])
+            writer.writerow(
+                ['Model Type', 'Sequence Length', 'Number of Processes', 'Overall Time (s)', 'Average Inference Time (s)'])
             for model_type, seq_info in self.results.items():
                 for seq_key, batch_info in seq_info.items():
                     seq_length = seq_key.split('_')[2]
@@ -183,11 +187,11 @@ class LanguageModelBenchmark:
 
     def run_benchmark(self, model_name, seq_length, tokenizer, process_index, inference_times, barrier):
         torch.cuda.empty_cache()
-        model = AutoModel.from_pretrained(model_name).cuda()
+        model = AutoModel.from_pretrained(model_name).to(self.device)
         model.eval()
 
         # Generate random text tokens for input
-        input_ids = tokenizer.encode("Hello " + "A" * (seq_length - 6), return_tensors='pt').cuda()
+        input_ids = tokenizer.encode("A" * (seq_length), return_tensors='pt').to(self.device)
 
         # Prepare decoder_input_ids which are required for T5
         if 't5' in model_name.lower():
@@ -195,7 +199,7 @@ class LanguageModelBenchmark:
             decoder_input_ids[:, 0] = tokenizer.eos_token_id
 
         # Warm-up phase (outside of timing)
-        warmup_input_ids = tokenizer.encode("Warmup " + "A" * (seq_length - 7), return_tensors='pt').cuda()
+        warmup_input_ids = tokenizer.encode("Warmup " + "A" * (seq_length - 7), return_tensors='pt').to(self.device)
         if 't5' in model_name.lower():
             warmup_decoder_input_ids = torch.full_like(warmup_input_ids, tokenizer.pad_token_id)
             warmup_decoder_input_ids[:, 0] = tokenizer.eos_token_id
@@ -203,18 +207,18 @@ class LanguageModelBenchmark:
         with torch.no_grad():
             for _ in range(10):  # Warm-up iterations
                 if 't5' in model_name.lower():
-                    outputs = model(input_ids=warmup_input_ids, decoder_input_ids=warmup_decoder_input_ids)
+                    model(input_ids=warmup_input_ids, decoder_input_ids=warmup_decoder_input_ids)
                 else:
-                    outputs = model(warmup_input_ids)
+                    model(warmup_input_ids)
 
         # Actual measurement
         start_time = time.time()
         with torch.no_grad():
             for _ in range(1000):
                 if 't5' in model_name.lower():
-                    outputs = model(input_ids=input_ids, decoder_input_ids=decoder_input_ids)
+                    model(input_ids=input_ids, decoder_input_ids=decoder_input_ids)
                 else:
-                    outputs = model(input_ids)
+                    model(input_ids)
         total_time = time.time() - start_time
         inference_times[process_index] = total_time / 1000.0
         barrier.wait()
