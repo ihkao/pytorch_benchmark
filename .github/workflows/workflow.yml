@@ -43,23 +43,23 @@ jobs:
   test-LanguageBenchmarks:
     runs-on: ubuntu-latest
     container:
-      image: pytorch/pytorch:latest
+      image: huggingface/transformers-pytorch-cpu
     steps:
       - uses: actions/checkout@v3
       - name: Install additional dependencies
         run: |
-          python -m pip install colorama pytest transformers
+          python -m pip install colorama pytest
       - name: Run tests
         run: pytest test/test_languagebenchmarks.py
   
   test-VisionBenchmarks:
     runs-on: ubuntu-latest
     container:
-      image: pytorch/pytorch:latest
+      image: huggingface/transformers-pytorch-cpu
     steps:
       - uses: actions/checkout@v3
       - name: Install additional dependencies
         run: |
-          python -m pip install colorama pytest transformers
+          python -m pip install colorama pytest
       - name: Run tests
         run: pytest test/test_visionbenchmarks.py
