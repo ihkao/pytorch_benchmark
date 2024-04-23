@@ -29,13 +29,13 @@ num_processes_list = [1]
 @pytest.mark.parametrize("model_type", model_types)
 @pytest.mark.parametrize("batch_size", batch_sizes)
 @pytest.mark.parametrize("num_processes", num_processes_list)
-def test_model_benchmark(model_type, batch_size, num_processes):
+def test_model_benchmark(model_type, batch_size, num_processes, tmp_path):
     """Test that each model runs benchmarks correctly across different batch sizes and number of processes."""
     benchmark = VisionModelBenchmark(
         model_types=[model_type],
         batch_sizes=[batch_size],
         num_processes_list=[num_processes],
-        device='cpu'
+        device='cuda'
     )
     # Run Test
     benchmark.start_benchmark()
@@ -46,22 +46,6 @@ def test_model_benchmark(model_type, batch_size, num_processes):
     # Validation Time
     assert 'average_inference_time' in benchmark.results[model_type][f'batchsize_{batch_size}'][f'processes_{num_processes}']
     assert benchmark.results[model_type][f'batchsize_{batch_size}'][f'processes_{num_processes}']['average_inference_time'] > 0
-
-
-@pytest.mark.parametrize("model_type", model_types)
-@pytest.mark.parametrize("batch_size", batch_sizes)
-@pytest.mark.parametrize("num_processes", num_processes_list)
-def test_save_results_to_csv(model_type, batch_size, num_processes, tmp_path):
-    """Test saving results to CSV file for each model configuration."""
-    # Create a benchmark object with specific parameters
-    benchmark = VisionModelBenchmark(
-        model_types=[model_type],
-        batch_sizes=[batch_size],
-        num_processes_list=[num_processes],
-        device='cpu'
-    )
-    # Run benchmark to populate results
-    benchmark.start_benchmark()
 
     # Define a temporary file path
     temp_file = tmp_path / "test_results.csv"
@@ -83,4 +67,4 @@ def test_save_results_to_csv(model_type, batch_size, num_processes, tmp_path):
                 # Check if the times are recorded and positive
                 assert float(row[3]) > 0, "Overall Time should be greater than 0"
                 assert float(row[4]) > 0, "Average Inference Time should be greater than 0"
-        assert found, "Expected results not found in the CSV file"
+        assert found, "Expected results not found in the CSV file"   

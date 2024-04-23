@@ -29,13 +29,13 @@ num_processes_list = [1]
 @pytest.mark.parametrize("model_type", model_types)
 @pytest.mark.parametrize("seq_length", sequence_lengths)
 @pytest.mark.parametrize("num_processes", num_processes_list)
-def test_language_model_benchmark(model_type, seq_length, num_processes):
+def test_language_model_benchmark(model_type, seq_length, num_processes, tmp_path):
     """Test that each language model runs benchmarks correctly across different sequence lengths and number of processes."""
     benchmark = LanguageModelBenchmark(
         model_types=[model_type],
         sequence_lengths=[seq_length],
         num_processes_list=[num_processes],
-        device='cpu'
+        device='cuda'
     )
     # Run Test
     benchmark.start_benchmark()
@@ -46,21 +46,6 @@ def test_language_model_benchmark(model_type, seq_length, num_processes):
     # Validation Time
     assert 'average_inference_time' in benchmark.results[model_type][f'seq_len_{seq_length}'][f'processes_{num_processes}']
     assert benchmark.results[model_type][f'seq_len_{seq_length}'][f'processes_{num_processes}']['average_inference_time'] > 0
-
-
-@pytest.mark.parametrize("model_type", model_types)
-@pytest.mark.parametrize("seq_length", sequence_lengths)
-@pytest.mark.parametrize("num_processes", num_processes_list)
-def test_save_results_to_csv(model_type, seq_length, num_processes, tmp_path):
-    """Test saving results to CSV file for each language model configuration."""
-    benchmark = LanguageModelBenchmark(
-        model_types=[model_type],
-        sequence_lengths=[seq_length],
-        num_processes_list=[num_processes],
-        device='cpu'
-    )
-    # Run benchmark to populate results
-    benchmark.start_benchmark()
 
     # Define a temporary file path
     temp_file = tmp_path / "test_results.csv"
