@@ -21,9 +21,9 @@ from BenchmarkMaker import VisionModelBenchmark
 mp.set_start_method('spawn', force=True)
 
 
-model_types = ['mobilenet']
-batch_sizes = [1]
-num_processes_list = [1]
+model_types = ['alexnet', 'densenet', 'googlenet', 'mobilenet', 'resnet18', 'resnext50_32x4d', 'vgg16']
+batch_sizes = [2]
+num_processes_list = [2]
 
 
 @pytest.mark.parametrize("model_type", model_types)
@@ -67,4 +67,4 @@ def test_model_benchmark(model_type, batch_size, num_processes, tmp_path):
                 # Check if the times are recorded and positive
                 assert float(row[3]) > 0, "Overall Time should be greater than 0"
                 assert float(row[4]) > 0, "Average Inference Time should be greater than 0"
-        assert found, "Expected results not found in the CSV file"   
+        assert found, "Expected results not found in the CSV file"

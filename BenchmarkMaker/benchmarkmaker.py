@@ -191,7 +191,7 @@ class LanguageModelBenchmark:
         model.eval()
 
         # Generate random text tokens for input
-        input_ids = tokenizer.encode("A" * (seq_length), return_tensors='pt').to(self.device)
+        input_ids = tokenizer.encode("A" * seq_length, return_tensors='pt').to(self.device)
 
         # Prepare decoder_input_ids which are required for T5
         if 't5' in model_name.lower():
@@ -199,7 +199,7 @@ class LanguageModelBenchmark:
             decoder_input_ids[:, 0] = tokenizer.eos_token_id
 
         # Warm-up phase (outside of timing)
-        warmup_input_ids = tokenizer.encode("Warmup " + "A" * (seq_length - 7), return_tensors='pt').to(self.device)
+        warmup_input_ids = tokenizer.encode("A" * seq_length, return_tensors='pt').to(self.device)
         if 't5' in model_name.lower():
             warmup_decoder_input_ids = torch.full_like(warmup_input_ids, tokenizer.pad_token_id)
             warmup_decoder_input_ids[:, 0] = tokenizer.eos_token_id

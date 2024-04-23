@@ -21,9 +21,9 @@ from BenchmarkMaker import LanguageModelBenchmark
 mp.set_start_method('spawn', force=True)
 
 
-model_types = ['distilgpt2']
-sequence_lengths = [1]
-num_processes_list = [1]
+model_types = ['bert', 'distilgpt2', 'gpt2', 'RoBERTa', 'T5']
+sequence_lengths = [2]
+num_processes_list = [2]
 
 
 @pytest.mark.parametrize("model_type", model_types)
