@@ -35,7 +35,7 @@ def test_language_model_benchmark(model_type, seq_length, num_processes, tmp_pat
         model_types=[model_type],
         sequence_lengths=[seq_length],
         num_processes_list=[num_processes],
-        device='cuda'
+        device='cpu'
     )
     # Run Test
     benchmark.start_benchmark()

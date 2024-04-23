@@ -35,7 +35,7 @@ def test_model_benchmark(model_type, batch_size, num_processes, tmp_path):
         model_types=[model_type],
         batch_sizes=[batch_size],
         num_processes_list=[num_processes],
-        device='cuda'
+        device='cpu'
     )
     # Run Test
     benchmark.start_benchmark()
